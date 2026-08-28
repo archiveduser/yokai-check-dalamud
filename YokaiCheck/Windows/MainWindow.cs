@@ -220,7 +220,7 @@ public unsafe partial class MainWindow : SimpleWindow
                     ImGui.SetCursorPosY(rowPosY + rowHeight / 2f - textHeight / 2f);
                     var count = inventoryManager->GetInventoryItemCount(medal.RowId);
 
-                    using (ImRaii.PushColor(ImGuiCol.Text, Color.Green, count == 10))
+                    using (ImRaii.PushColor(ImGuiCol.Text, Color.Green, count >= 10))
                         ImGui.TextUnformatted(_textService.Translate("MainWindow.IncompleteWeaponMedallionCounter", count));
 
                     if (ImGui.IsItemHovered() && _excelService.TryFindRow<YKW>(row => row.Item.RowId == weaponInfo.Medal, out var row))
