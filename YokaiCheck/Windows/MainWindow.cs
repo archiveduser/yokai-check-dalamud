@@ -27,11 +27,11 @@ public unsafe partial class MainWindow : SimpleWindow
     [AutoPostConstruct]
     private void Initialize()
     {
-        Size = new Vector2(610, 750);
+        Size = new Vector2(820, 750);
         SizeCondition = ImGuiCond.FirstUseEver;
         SizeConstraints = new()
         {
-            MinimumSize = new Vector2(570, 200),
+            MinimumSize = new Vector2(780, 200),
             MaximumSize = new Vector2(4069),
         };
     }
@@ -115,13 +115,14 @@ public unsafe partial class MainWindow : SimpleWindow
 
     private void DrawMinionWeaponTable(Vector2 itemInnerSpacing, InventoryManager* inventoryManager, UIState* uiState, bool achievementsLoded, bool hasAllWeapons, float textHeight, float rowHeight)
     {
-        using var table = ImRaii.Table("YKWTable", hasAllWeapons ? 2 : 3);
+        using var table = ImRaii.Table("YKWTable", hasAllWeapons ? 3 : 4);
         if (!table) return;
 
         ImGui.TableSetupColumn(_textService.Translate("MainWindow.YKWTable.ColumnHeader.Minion"), ImGuiTableColumnFlags.WidthFixed, 180);
         ImGui.TableSetupColumn(_textService.Translate("MainWindow.YKWTable.ColumnHeader.Weapon"), ImGuiTableColumnFlags.WidthFixed, 280);
         if (!hasAllWeapons)
             ImGui.TableSetupColumn(_textService.Translate("MainWindow.YKWTable.ColumnHeader.LegendaryMedals"), ImGuiTableColumnFlags.WidthFixed, 120);
+        ImGui.TableSetupColumn(_textService.Translate("MainWindow.YKWTable.ColumnHeader.Locations"), ImGuiTableColumnFlags.WidthStretch);
         ImGui.TableHeadersRow();
 
         var currentMinionId = Plugin.GetCurrentMinionId();
@@ -240,6 +241,44 @@ public unsafe partial class MainWindow : SimpleWindow
                     }
                 }
             }
+
+            // Locations
+            ImGui.TableNextColumn();
+            DrawLocations(weaponInfo.Medal, rowPosY, textHeight);
+        }
+    }
+
+    private void DrawLocations(uint medalItemId, float rowPosY, float textHeight)
+    {
+        if (!_excelService.TryFindRow<YKW>(row => row.Item.RowId == medalItemId, out var ykw))
+            return;
+
+        var currentTerritoryId = _clientState.TerritoryType;
+        var locationIndex = 0;
+
+        foreach (var location in ykw.Location)
+        {
+            if (location.RowId == 0 || !location.IsValid)
+                continue;
+
+            var territory = location.Value!;
+            var placeName = _textService.GetPlaceName(territory.PlaceName.RowId);
+            var isCurrentTerritory = territory.RowId == currentTerritoryId;
+
+            ImGui.SetCursorPosY(rowPosY + locationIndex * textHeight);
+            using (ImRaii.PushColor(ImGuiCol.Text, Color.Green, isCurrentTerritory))
+                ImGui.TextUnformatted(placeName);
+
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                ImGui.SetTooltip(_textService.Translate("MainWindow.TeleportToLocation.Tooltip", placeName));
+            }
+
+            if (ImGui.IsItemClicked() && territory.Aetheryte.RowId != 0)
+                Telepo.Instance()->Teleport(territory.Aetheryte.RowId, 0);
+
+            locationIndex++;
         }
     }
 

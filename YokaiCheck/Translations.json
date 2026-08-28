@@ -67,6 +67,16 @@
     "en": "Legendary Medals",
     "de": "Legendäre Medallien"
   },
+  "MainWindow.YKWTable.ColumnHeader.Locations": {
+    "en": "Locations",
+    "de": "Gebiete",
+    "zh": "地图"
+  },
+  "MainWindow.TeleportToLocation.Tooltip": {
+    "en": "Teleport to {0}",
+    "de": "Nach {0} teleportieren",
+    "zh": "传送到{0}"
+  },
   "MainWindow.CompletionCheckmark.Tooltip.Collected": {
     "en": "Collected",
     "de": "Gesammelt"
